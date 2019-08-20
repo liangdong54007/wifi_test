@@ -65,6 +65,10 @@ user_devicefind_recv(void *arg, char *pusrdata, unsigned short length)
     remot_info *premot = NULL;
     struct ip_info ipconfig;
 
+	//ld add 20190806
+	os_printf("len:%u\n",length);
+	os_printf("user_devicefind_recv()->pusrdata:%s\r\n",pusrdata);
+
     if (wifi_get_opmode() != STATION_MODE) {
         wifi_get_ip_info(SOFTAP_IF, &ipconfig);
         wifi_get_macaddr(SOFTAP_IF, hwaddr);
@@ -117,6 +121,38 @@ user_devicefind_recv(void *arg, char *pusrdata, unsigned short length)
     }
 }
 
+
+
+os_timer_t send_udp_cmd_timer;
+void ICACHE_FLASH_ATTR
+send_udp_cmd_callback(void *arg)
+{
+	char hwaddr[6];
+	remot_info *premot = NULL;
+	struct ip_info ipconfig;
+	
+	if (wifi_get_opmode() == STATION_MODE) 
+	{
+		wifi_get_ip_info(STATION_IF, &ipconfig);
+		wifi_get_macaddr(STATION_IF, hwaddr);
+		 
+		os_printf("STATION_MODE -->ip = %d.%d.%d.%d", IP2STR(&ipconfig.ip));
+	}
+	else
+	{
+		wifi_get_ip_info(SOFTAP_IF, &ipconfig);
+		os_printf("SOFTAP_MODE -->ip = %d.%d.%d.%d", IP2STR(&ipconfig.ip));
+	}
+}
+
+void ICACHE_FLASH_ATTR
+my_send_udp_cmd_init(void)
+{
+	os_timer_disarm(&send_udp_cmd_timer);
+	os_timer_setfn(&send_udp_cmd_timer, send_udp_cmd_callback , NULL);
+	os_timer_arm(&send_udp_cmd_timer,2000,1);
+}
+
 /******************************************************************************
  * FunctionName : user_devicefind_init
  * Description  : the espconn struct parame init
@@ -131,4 +167,7 @@ user_devicefind_init(void)
     ptrespconn.proto.udp->local_port = 1025;
     espconn_regist_recvcb(&ptrespconn, user_devicefind_recv);
     espconn_create(&ptrespconn);
+	//下面这个函数是为了让app得到dhcp分配的ip，现在不用了 
+	//使用mDNS服务解决此问题
+   // my_send_udp_cmd_init();
 }

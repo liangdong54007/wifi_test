@@ -47,9 +47,9 @@
 #include "user_light.h"
 #endif
 
+ extern  struct esp_platform_saved_param esp_param;
 LOCAL struct station_config *sta_conf;
 LOCAL struct softap_config *ap_conf;
-
 //LOCAL struct secrty_server_info *sec_server;
 //LOCAL struct upgrade_server_info *server;
 //struct lewei_login_info *login_info;
@@ -293,6 +293,21 @@ light_status_get(struct jsontree_context *js_ctx)
         }
     } else if (os_strncmp(path, "period", 6) == 0) {
         jsontree_write_int(js_ctx, user_light_get_period());
+    }else if (os_strncmp(path, "tsH", 3) == 0) {
+       // jsontree_write_int(js_ctx, 20);
+	 jsontree_write_int_array(js_ctx, esp_param.tsH_buff, 7);
+    }else if (os_strncmp(path, "tsM", 3) == 0) {
+        jsontree_write_int_array(js_ctx, esp_param.tsM_buff, 7);
+    }else if (os_strncmp(path, "teH", 3) == 0) {
+       jsontree_write_int_array(js_ctx, esp_param.teH_buff, 7);
+    }else if (os_strncmp(path, "teM", 3) == 0) {
+       jsontree_write_int_array(js_ctx, esp_param.teM_buff, 7);
+    }else if (os_strncmp(path, "alarm_red", 9) == 0) {
+       jsontree_write_int_array(js_ctx, esp_param.alarm_red, 7);
+    }else if (os_strncmp(path, "alarm_green", 11) == 0) {
+       jsontree_write_int_array(js_ctx, esp_param.alarm_green, 7);
+    }else if (os_strncmp(path, "alarm_blue", 10) == 0) {
+       jsontree_write_int_array(js_ctx, esp_param.alarm_blue, 7);
     }
 
     return 0;
@@ -302,6 +317,8 @@ LOCAL int ICACHE_FLASH_ATTR
 light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser)
 {
     int type;
+    int now_set_alarm=0;
+    int flag_is_alarm_data=0;
     static uint32 r,g,b,cw,ww,period;
     period = 1000;
     cw=0;
@@ -355,7 +372,41 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
                 os_printf("WW: %d \n",status);
                 //user_light_set_duty(status, LIGHT_BLUE);
                 //set_aim_b( b);
-            } else if (jsonparse_strcmp_value(parser, "period") == 0) {
+            } else if (jsonparse_strcmp_value(parser, "alarm") == 0) {
+                jsonparse_next(parser);
+                jsonparse_next(parser);
+                now_set_alarm = jsonparse_get_value_as_int(parser);
+                os_printf("alarm: %d \n",now_set_alarm);
+            }else if (jsonparse_strcmp_value(parser, "tsH") == 0) {
+                jsonparse_next(parser);
+                jsonparse_next(parser);
+                esp_param.tsH_buff[now_set_alarm] = jsonparse_get_value_as_int(parser);
+                os_printf("esp_param.tsH_buff[%d]: %d \n",now_set_alarm,esp_param.tsH_buff[now_set_alarm]);
+                
+            }else if (jsonparse_strcmp_value(parser, "tsM") == 0) {
+                jsonparse_next(parser);
+                jsonparse_next(parser);
+                 esp_param.tsM_buff[now_set_alarm]  = jsonparse_get_value_as_int(parser);
+                os_printf("esp_param.tsM_buff[%d]: %d \n",now_set_alarm,esp_param.tsM_buff[now_set_alarm]);
+                
+            }else if (jsonparse_strcmp_value(parser, "teH") == 0) {
+                jsonparse_next(parser);
+                jsonparse_next(parser);
+                esp_param.teH_buff[now_set_alarm] = jsonparse_get_value_as_int(parser);
+                os_printf("esp_param.teH_buff[%d]: %d \n",now_set_alarm,esp_param.teH_buff[now_set_alarm] );
+                
+            }else if (jsonparse_strcmp_value(parser, "teM") == 0) {
+                jsonparse_next(parser);
+                jsonparse_next(parser);
+                esp_param.teM_buff[now_set_alarm]  = jsonparse_get_value_as_int(parser);
+                os_printf("esp_param.teM_buff[%d]: %d \n",now_set_alarm, esp_param.teM_buff[now_set_alarm] );
+		  esp_param.alarm_red[now_set_alarm] = r;
+		  esp_param.alarm_green[now_set_alarm] = g;
+		  esp_param.alarm_blue[now_set_alarm] = b;
+		  flag_is_alarm_data  = 1;  //到这里表示改json报文为alarm设置报文  rgb数据不是灯亮度改变
+		   os_printf("ld add save_alarm_data to flash\r\n");
+		  system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));		
+            }else if (jsonparse_strcmp_value(parser, "period") == 0) {
                 uint32 status;
                 jsonparse_next(parser);
                 jsonparse_next(parser);
@@ -370,24 +421,27 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
                 status = jsonparse_get_value_as_int(parser);
                 os_printf("rspneed: %d \n",status);
                 PostCmdNeeRsp = status;
-                
             }
+			
+				
         }
     }
+	if(0 == flag_is_alarm_data)  //如果flag_is_alarm_data ==0 则才是rgb更改数据，否则为闹铃数据
+	{
+	    if((r|g|b|ww|cw) == 0){
+	        if(light_sleep_flg==0){
 
-    if((r|g|b|ww|cw) == 0){
-        if(light_sleep_flg==0){
-
-        }
-        
-    }else{
-        if(light_sleep_flg==1){
-            os_printf("modem sleep en\r\n");
-            wifi_set_sleep_type(MODEM_SLEEP_T);
-            light_sleep_flg =0;
-        }
-    }
-    light_set_aim(r,g,b,cw,ww,period);
+	        }
+	        
+	    }else{
+	        if(light_sleep_flg==1){
+	            os_printf("modem sleep en\r\n");
+	            wifi_set_sleep_type(MODEM_SLEEP_T);
+	            light_sleep_flg =0;
+	        }
+	    }
+	    light_set_aim(r,g,b,cw,ww,period);
+	}
     return 0;
 }
 
@@ -400,6 +454,14 @@ JSONTREE_OBJECT(rgb_tree,
                 JSONTREE_PAIR("blue", &light_callback),
                 JSONTREE_PAIR("cwhite", &light_callback),
                 JSONTREE_PAIR("wwhite", &light_callback),
+                JSONTREE_PAIR("alarm", &light_callback),
+                JSONTREE_PAIR("tsH", &light_callback),
+                JSONTREE_PAIR("tsM", &light_callback),
+                JSONTREE_PAIR("teH", &light_callback),
+                JSONTREE_PAIR("teM", &light_callback),
+                JSONTREE_PAIR("alarm_red", &light_callback),
+                JSONTREE_PAIR("alarm_green", &light_callback),
+                JSONTREE_PAIR("alarm_blue", &light_callback),
                 );
 JSONTREE_OBJECT(sta_tree,
                 JSONTREE_PAIR("period", &light_callback),
@@ -1420,8 +1482,8 @@ webserver_recv(void *arg, char *pusrdata, unsigned short length)
     struct espconn *ptrespconn = arg;
 
     if(upgrade_lock == 0){
-
         os_printf("len:%u\n",length);
+	os_printf("webserver_recv()->pusrdata:%s\r\n",pusrdata);
         if(check_data(pusrdata, length) == false)
         {
             os_printf("goto\n");
@@ -1672,7 +1734,7 @@ webserver_recv(void *arg, char *pusrdata, unsigned short length)
                     }
                     else if (os_strcmp(pURL_Frame->pFilename, "reset") == 0) {
                             response_send(ptrespconn, true);
-                            extern  struct esp_platform_saved_param esp_param;
+                           
                             esp_param.activeflag = 0;
                             system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));
                             system_restore();
@@ -1718,7 +1780,7 @@ webserver_recv(void *arg, char *pusrdata, unsigned short length)
         _temp_exit:
             ;
     }
-    else if(upgrade_lock == 1){
+else if(upgrade_lock == 1){
     	local_upgrade_download(ptrespconn,pusrdata, length);
 		if (precvbuffer != NULL){
 			os_free(precvbuffer);

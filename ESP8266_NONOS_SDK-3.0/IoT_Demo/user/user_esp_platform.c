@@ -258,6 +258,8 @@ user_esp_platform_get_info(struct espconn *pconn, uint8 *pbuffer)
         espconn_secure_sent(pconn, pbuf, os_strlen(pbuf));
 #else
         espconn_sent(pconn, pbuf, os_strlen(pbuf));
+	 ESP_DBG("user_esp_platform_get_info()--> %s\n", pbuf);
+
 #endif
         os_free(pbuf);
         pbuf = NULL;
@@ -618,6 +620,7 @@ user_esp_platform_sent(struct espconn *pespconn)
         espconn_secure_sent(pespconn, pbuf, os_strlen(pbuf));
 #else
         espconn_sent(pespconn, pbuf, os_strlen(pbuf));
+	ESP_DBG("user_esp_platform_sent()--> %s\n", pbuf);
 #endif
 
         os_free(pbuf);
@@ -661,6 +664,7 @@ user_esp_platform_sent_beacon(struct espconn *pespconn)
                     espconn_secure_sent(pespconn, pbuf, os_strlen(pbuf));
 #else
                     espconn_sent(pespconn, pbuf, os_strlen(pbuf));
+			ESP_DBG("user_esp_platform_sent_beacon()--> %s\n", pbuf);
 #endif
 
                     ping_status = 0;
@@ -697,6 +701,7 @@ user_platform_rpc_set_rsp(struct espconn *pespconn, int nonce)
     espconn_secure_sent(pespconn, pbuf, os_strlen(pbuf));
 #else
     espconn_sent(pespconn, pbuf, os_strlen(pbuf));
+    ESP_DBG("user_esp_platform_sent_beacon()--> %s\n", pbuf);
 #endif
     os_free(pbuf);
 }
@@ -724,6 +729,7 @@ user_platform_timer_get(struct espconn *pespconn)
     espconn_secure_sent(pespconn, pbuf, os_strlen(pbuf));
 #else
     espconn_sent(pespconn, pbuf, os_strlen(pbuf));
+	ESP_DBG("user_platform_timer_get()--> %s\n", pbuf);
 #endif
     os_free(pbuf);
 }
@@ -756,6 +762,7 @@ user_esp_platform_upgrade_rsp(void *arg)
         espconn_secure_sent(pespconn, pbuf, os_strlen(pbuf));
 #else
         espconn_sent(pespconn, pbuf, os_strlen(pbuf));
+	ESP_DBG("user_esp_platform_upgrade_rsp()--> %s\n", pbuf);
 #endif
 
         if (pbuf != NULL) {
@@ -1074,7 +1081,7 @@ sntp_read_timer_callback(void *arg)
 	struct tm * res;
 	uint32_t time = sntp_get_current_timestamp();
 	os_printf("time:%d\r\n",time);
-	os_printf("date:%s\r\n",sntp_get_real_time(time));
+	//os_printf("date:%s\r\n",sntp_get_real_time(time));
 	res = sntp_localtime ((const time_t *)&time);
 	os_printf("year= %d ,mon = %d,day = %d,hour = %d ,min = %d,tm_sec =  %d\n",res->tm_year+1900,res->tm_mon+1,res->tm_mday,res->tm_hour,res->tm_min,res->tm_sec);
 }
@@ -1089,9 +1096,9 @@ my_sntp_init(void)
  
 	os_timer_disarm(&sntp_read_timer);
 	os_timer_setfn(&sntp_read_timer, sntp_read_timer_callback , NULL);
-	os_timer_arm(&sntp_read_timer,5000,1);
-
+	os_timer_arm(&sntp_read_timer,30000,1);
 }
+
 
 
 /******************************************************************************
@@ -1111,7 +1118,7 @@ user_esp_platform_connect_cb(void *arg)
     }
 
 //// ld test for sntp 2019.07.31
-	my_sntp_init();
+    my_sntp_init();
 
 #if (PLUG_DEVICE || SENSOR_DEVICE)
     user_link_led_timer_done();
@@ -1242,7 +1249,6 @@ info->server_name = "espLight";
 info->server_port = 80;
 info->txt_data[0] = "version = 1.0.1";
 espconn_mdns_init(info);
-
 
 }
 #endif

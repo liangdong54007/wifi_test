@@ -1,6 +1,0 @@
----- sntp_get_real_time Matches (5 in 4 files) ----
-Sntp.c (third_party\lwip\core):char* sntp_get_real_time(time_t t)
-Sntp.h (include):char* sntp_get_real_time(long t);
-Sntp.h (third_party\include\lwip):char* sntp_get_real_time(long t);
-User_esp_platform.c (iot_demo\user):	os_printf("date:%s\r\n",sntp_get_real_time(time));
-User_esp_platform.c (iot_demo\user):	string = sntp_get_real_time(time);//×ª»¯Îª ×Ö·û´®

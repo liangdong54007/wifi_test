@@ -250,6 +250,7 @@ struct station_config {
     bool open_and_wep_mode_disable; // Can connect to open/wep router by default.
 };
 
+
 bool wifi_station_get_config(struct station_config *config);
 bool wifi_station_get_config_default(struct station_config *config);
 bool wifi_station_set_config(struct station_config *config);

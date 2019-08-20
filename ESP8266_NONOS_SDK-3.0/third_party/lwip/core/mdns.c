@@ -568,6 +568,8 @@ mdns_send_service(struct mdns_info *info, u8_t id) {
 	/* if here, we have either a new query or a retry on a previous query to process */
 	p = pbuf_alloc(PBUF_TRANSPORT,
 			SIZEOF_DNS_HDR + MDNS_MAX_NAME_LENGTH * 2 + SIZEOF_DNS_QUERY, PBUF_RAM);
+
+	 os_printf("mdns_send_service()-->get a mDNS service answer packet.\r\n");
 	if (p != NULL) {
 		LWIP_ASSERT("pbuf must be in one piece", p->next == NULL);
 		/* fill dns header */
@@ -817,6 +819,7 @@ mdns_send_service(struct mdns_info *info, u8_t id) {
 			  netif_set_default(ap_netif);
 			}
 		}
+		
 		err = udp_sendto(mdns_pcb, p, &multicast_addr, DNS_MDNS_PORT);
 
 		/* free pbuf */

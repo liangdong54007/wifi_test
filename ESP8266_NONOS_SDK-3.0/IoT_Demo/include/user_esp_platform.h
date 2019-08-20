@@ -28,12 +28,20 @@
 #define packet_size   (2 * 1024)
 
 #define token_size 41
+#define MAX_ALARM_NUM 7
 
 struct esp_platform_saved_param {
     uint8 devkey[40];
     uint8 token[40];
     uint8 activeflag;
     uint8 pad[3];
+    int tsH_buff[MAX_ALARM_NUM];
+    int tsM_buff[MAX_ALARM_NUM];
+    int teH_buff[MAX_ALARM_NUM];
+    int teM_buff[MAX_ALARM_NUM];
+    uint32 alarm_red[MAX_ALARM_NUM];
+    uint32 alarm_green[MAX_ALARM_NUM];
+    uint32 alarm_blue[MAX_ALARM_NUM];
 };
 
 enum {
