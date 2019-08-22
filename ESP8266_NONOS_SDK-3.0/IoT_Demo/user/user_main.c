@@ -128,12 +128,13 @@ user_init(void)
     uart_init(BIT_RATE_115200, BIT_RATE_115200);
     os_printf("SDK version:%s\n", system_get_sdk_version());
     os_printf("\r\n-------------------ld007 --hello word!!----------------------------\r\n");
-    os_printf("---------ld007 rgb wc light demo  sntp  20190807 10:30------------------\r\n");
+    os_printf("---------ld007 rgb wc light demo  sntp  20190818 10:30------------------\r\n");
 
     if (!system_partition_get_item(SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM, &partition_item)) {
         os_printf("Get partition information fail\n");
     }
     priv_param_start_sec = partition_item.addr/SPI_FLASH_SEC_SIZE;
+	os_printf("priv_param_start_sec = %x\n",priv_param_start_sec);
 #if ESP_PLATFORM
     /*Initialization of the peripheral drivers*/
     /*For light demo , it is user_light_init();*/

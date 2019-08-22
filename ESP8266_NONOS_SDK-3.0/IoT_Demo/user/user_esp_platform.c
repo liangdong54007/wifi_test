@@ -482,7 +482,7 @@ user_esp_platform_discon_cb(void *arg)
     	dhcp_info.flag = 0x01;
     	os_printf("dhcp_info.ip_addr = %d\n",dhcp_info.ip_addr);
     	system_rtc_mem_write(64,&dhcp_info,sizeof(struct dhcp_client_info));
-        user_sensor_deep_sleep_enter();
+       user_sensor_deep_sleep_enter();
     } else {
         os_timer_disarm(&client_timer);
         os_timer_setfn(&client_timer, (os_timer_func_t *)user_esp_platform_reconnect, pespconn);
@@ -1333,12 +1333,25 @@ user_esp_platform_check_ip(uint8 reset_flag)
 void ICACHE_FLASH_ATTR
 user_esp_platform_init(void)
 {
-
+	int index=0;
 	os_sprintf(iot_version,"%s%d.%d.%dt%d(%s)",VERSION_TYPE,IOT_VERSION_MAJOR,\
 	IOT_VERSION_MINOR,IOT_VERSION_REVISION,device_type,UPGRADE_FALG);
 	os_printf("IOT VERSION = %s\n",iot_version);
 
 	system_param_load(priv_param_start_sec + 1, 0, &esp_param, sizeof(esp_param));
+	if(0x5A !=esp_param.flag_alarm_save)  //如果从来没有保存过alarm  则初始化为0
+	{
+		for(index=0;index<MAX_ALARM_NUM;index++)
+		{
+			esp_param.alarm_red[index] = 0;
+			esp_param.alarm_green[index] = 0;
+			esp_param.alarm_blue[index] = 0;
+			esp_param.tsH_buff[index] = 0;
+			esp_param.tsM_buff[index] = 0;
+			esp_param.teH_buff[index] = 0;
+			esp_param.teM_buff[index] = 0;
+		}
+	}
 
 	struct rst_info *rtc_info = system_get_rst_info();
 
@@ -1355,9 +1368,9 @@ user_esp_platform_init(void)
 	}
 
 	/***add by tzx for saving ip_info to avoid dhcp_client start****/
-    struct dhcp_client_info dhcp_info;
-    struct ip_info sta_info;
-    system_rtc_mem_read(64,&dhcp_info,sizeof(struct dhcp_client_info));
+       struct dhcp_client_info dhcp_info;
+       struct ip_info sta_info;
+       system_rtc_mem_read(64,&dhcp_info,sizeof(struct dhcp_client_info));
 	if(dhcp_info.flag == 0x01 ) {
 		if (true == wifi_station_dhcpc_status())
 		{

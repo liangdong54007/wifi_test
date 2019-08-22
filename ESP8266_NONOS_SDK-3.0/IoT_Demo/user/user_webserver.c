@@ -393,18 +393,19 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
                 jsonparse_next(parser);
                 jsonparse_next(parser);
                 esp_param.teH_buff[now_set_alarm] = jsonparse_get_value_as_int(parser);
-                os_printf("esp_param.teH_buff[%d]: %d \n",now_set_alarm,esp_param.teH_buff[now_set_alarm] );
+                os_printf("esp_param.teH_buff[%d]: %d \n",now_set_alarm,esp_param.teH_buff[now_set_alarm]);
                 
             }else if (jsonparse_strcmp_value(parser, "teM") == 0) {
                 jsonparse_next(parser);
                 jsonparse_next(parser);
                 esp_param.teM_buff[now_set_alarm]  = jsonparse_get_value_as_int(parser);
-                os_printf("esp_param.teM_buff[%d]: %d \n",now_set_alarm, esp_param.teM_buff[now_set_alarm] );
+                os_printf("esp_param.teM_buff[%d]: %d \n",now_set_alarm, esp_param.teM_buff[now_set_alarm]);
 		  esp_param.alarm_red[now_set_alarm] = r;
 		  esp_param.alarm_green[now_set_alarm] = g;
 		  esp_param.alarm_blue[now_set_alarm] = b;
+		  esp_param.flag_alarm_save = 0X5A;
 		  flag_is_alarm_data  = 1;  //到这里表示改json报文为alarm设置报文  rgb数据不是灯亮度改变
-		   os_printf("ld add save_alarm_data to flash\r\n");
+		  os_printf("ld add save_alarm_data to flash\r\n");
 		  system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));		
             }else if (jsonparse_strcmp_value(parser, "period") == 0) {
                 uint32 status;

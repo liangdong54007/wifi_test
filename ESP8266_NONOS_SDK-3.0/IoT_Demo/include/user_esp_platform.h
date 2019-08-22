@@ -35,6 +35,7 @@ struct esp_platform_saved_param {
     uint8 token[40];
     uint8 activeflag;
     uint8 pad[3];
+    int flag_alarm_save;
     int tsH_buff[MAX_ALARM_NUM];
     int tsM_buff[MAX_ALARM_NUM];
     int teH_buff[MAX_ALARM_NUM];
