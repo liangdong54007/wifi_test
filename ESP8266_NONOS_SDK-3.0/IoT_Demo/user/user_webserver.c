@@ -293,22 +293,37 @@ light_status_get(struct jsontree_context *js_ctx)
         }
     } else if (os_strncmp(path, "period", 6) == 0) {
         jsontree_write_int(js_ctx, user_light_get_period());
-    }else if (os_strncmp(path, "tsH", 3) == 0) {
-       // jsontree_write_int(js_ctx, 20);
-	 jsontree_write_int_array(js_ctx, esp_param.tsH_buff, 7);
+    }	else if (os_strncmp(path, "tsH", 3) == 0) {
+	jsontree_write_atom(js_ctx, "[");
+    	jsontree_write_int_array(js_ctx, esp_param.tsH_buff, 7);
+    	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "tsM", 3) == 0) {
+        jsontree_write_atom(js_ctx, "[");
         jsontree_write_int_array(js_ctx, esp_param.tsM_buff, 7);
+	 jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "teH", 3) == 0) {
-       jsontree_write_int_array(js_ctx, esp_param.teH_buff, 7);
+	jsontree_write_atom(js_ctx, "[");
+	jsontree_write_int_array(js_ctx, esp_param.teH_buff, 7);
+	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "teM", 3) == 0) {
-       jsontree_write_int_array(js_ctx, esp_param.teM_buff, 7);
+	jsontree_write_atom(js_ctx, "[");
+	jsontree_write_int_array(js_ctx, esp_param.teM_buff, 7);
+	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "alarm_red", 9) == 0) {
+       jsontree_write_atom(js_ctx, "[");
        jsontree_write_int_array(js_ctx, esp_param.alarm_red, 7);
+	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "alarm_green", 11) == 0) {
-       jsontree_write_int_array(js_ctx, esp_param.alarm_green, 7);
+	jsontree_write_atom(js_ctx, "[");
+	jsontree_write_int_array(js_ctx, esp_param.alarm_green, 7);
+	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "alarm_blue", 10) == 0) {
-       jsontree_write_int_array(js_ctx, esp_param.alarm_blue, 7);
-    }
+	jsontree_write_atom(js_ctx, "[");
+	jsontree_write_int_array(js_ctx, esp_param.alarm_blue, 7);
+	jsontree_write_atom(js_ctx, "]");
+    }else if (os_strncmp(path, "alarm", 5) == 0) {
+        jsontree_write_int(js_ctx, 1);
+    } 
 
     return 0;
 }
