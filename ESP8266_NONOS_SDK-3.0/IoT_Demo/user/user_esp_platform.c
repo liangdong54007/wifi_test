@@ -34,6 +34,11 @@
 #include "user_iot_version.h"
 #include "upgrade.h"
 
+#if LIGHT_DEVICE
+#include "user_light.h"
+#endif
+
+
 #if ESP_PLATFORM
 
 #define ESP_DEBUG
@@ -1072,7 +1077,44 @@ user_esp_platform_recon_cb(void *arg, sint8 err)
 #endif
 }
 
+int curr_alarm = 100;  //表征当前执行的闹钟   100是个无效值 因为它大于MAX_ALARM_NUM-1
+void ICACHE_FLASH_ATTR
+alarm_ctl(struct tm * p_res)
+{
+	int index=0;
+	for(index=0;index<MAX_ALARM_NUM;index++)
+	{
+		os_printf("tm_hour:%d,tm_min:%d,tsH:%d,tsM:%d,teH:%d,teM:%d\r\n",p_res->tm_hour,p_res->tm_min,
+		esp_param.tsH_buff[index],esp_param.tsM_buff[index],esp_param.teH_buff[index],esp_param.teM_buff[index]);
+		os_printf("curr_alarm:%d,index:%d\r\n",curr_alarm,index );
+		if( (p_res->tm_hour>=esp_param.tsH_buff[index])&&(p_res->tm_hour<=esp_param.teH_buff[index])&&
+									(index!=curr_alarm))
 
+		{
+			if((p_res->tm_hour==esp_param.tsH_buff[index])&&(p_res->tm_min<esp_param.tsM_buff[index]))
+			{
+				//当hour等于tsH的时候，如果tm_min< tsM_buff,那么闹钟没到
+				//do_nothing
+			}
+			else
+			{ 
+				if((p_res->tm_hour==esp_param.teH_buff[index])&&(p_res->tm_min>=esp_param.teM_buff[index]))
+				{   // 当时间的小时数相等时候，如果tm_hour>= teM_buff,那么闹钟没到
+					//do_nothing
+				}
+				else
+				{  //当tm_hour<teH_buff的时候不需要再判定min的值
+					curr_alarm = index;
+					os_printf("alarm time now222:%d\r\n",curr_alarm);
+					light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+						0,0,user_light_get_period());
+				}
+			}
+			
+			
+		}
+	}
+}
 
 os_timer_t sntp_read_timer;
 void ICACHE_FLASH_ATTR
@@ -1083,6 +1125,7 @@ sntp_read_timer_callback(void *arg)
 	os_printf("time:%d\r\n",time);
 	//os_printf("date:%s\r\n",sntp_get_real_time(time));
 	res = sntp_localtime ((const time_t *)&time);
+	alarm_ctl(res);
 	os_printf("year= %d ,mon = %d,day = %d,hour = %d ,min = %d,tm_sec =  %d\n",res->tm_year+1900,res->tm_mon+1,res->tm_mday,res->tm_hour,res->tm_min,res->tm_sec);
 }
  
@@ -1096,7 +1139,7 @@ my_sntp_init(void)
  
 	os_timer_disarm(&sntp_read_timer);
 	os_timer_setfn(&sntp_read_timer, sntp_read_timer_callback , NULL);
-	os_timer_arm(&sntp_read_timer,30000,1);
+	os_timer_arm(&sntp_read_timer,3000,1);
 }
 
 

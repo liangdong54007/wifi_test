@@ -47,6 +47,7 @@
 #include "user_light.h"
 #endif
 
+extern int curr_alarm;  //表征当前执行的闹钟   100是个无效值 因为它大于MAX_ALARM_NUM-1
  extern  struct esp_platform_saved_param esp_param;
 LOCAL struct station_config *sta_conf;
 LOCAL struct softap_config *ap_conf;
@@ -420,6 +421,11 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
 		  esp_param.alarm_blue[now_set_alarm] = b;
 		  esp_param.flag_alarm_save = 0X5A;
 		  flag_is_alarm_data  = 1;  //到这里表示改json报文为alarm设置报文  rgb数据不是灯亮度改变
+		  if(curr_alarm ==now_set_alarm)
+	  	{//如果重新接受的闹钟为当前时间段执行闹钟，则重新使能它
+	  		curr_alarm = 100; 
+	  	}
+		  
 		  os_printf("ld add save_alarm_data to flash\r\n");
 		  system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));		
             }else if (jsonparse_strcmp_value(parser, "period") == 0) {
