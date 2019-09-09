@@ -1084,9 +1084,8 @@ alarm_ctl(struct tm * p_res)
 	int index=0;
 	for(index=0;index<MAX_ALARM_NUM;index++)
 	{
-		os_printf("tm_hour:%d,tm_min:%d,tsH:%d,tsM:%d,teH:%d,teM:%d\r\n",p_res->tm_hour,p_res->tm_min,
-		esp_param.tsH_buff[index],esp_param.tsM_buff[index],esp_param.teH_buff[index],esp_param.teM_buff[index]);
-		os_printf("curr_alarm:%d,index:%d\r\n",curr_alarm,index );
+		//os_printf("tm_hour:%d,tm_min:%d,tsH:%d,tsM:%d,teH:%d,teM:%d\r\n",p_res->tm_hour,p_res->tm_min,esp_param.tsH_buff[index],esp_param.tsM_buff[index],esp_param.teH_buff[index],esp_param.teM_buff[index]);
+		//os_printf("curr_alarm:%d,index:%d\r\n",curr_alarm,index );
 		if( (p_res->tm_hour>=esp_param.tsH_buff[index])&&(p_res->tm_hour<=esp_param.teH_buff[index])&&
 									(index!=curr_alarm))
 
@@ -1104,10 +1103,13 @@ alarm_ctl(struct tm * p_res)
 				}
 				else
 				{  //当tm_hour<teH_buff的时候不需要再判定min的值
-					curr_alarm = index;
-					os_printf("alarm time now222:%d\r\n",curr_alarm);
-					light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
-						0,0,user_light_get_period());
+					if(esp_param.alarm_repeat[index] &(0x01<<(p_res->tm_wday)))
+					{  //当星期n被使能才最终出发闹钟
+						curr_alarm = index;
+						os_printf("alarm time now:%d\r\n",curr_alarm);
+						light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+							0,0,user_light_get_period());
+					}
 				}
 			}
 			
@@ -1126,7 +1128,7 @@ sntp_read_timer_callback(void *arg)
 	//os_printf("date:%s\r\n",sntp_get_real_time(time));
 	res = sntp_localtime ((const time_t *)&time);
 	alarm_ctl(res);
-	os_printf("year= %d ,mon = %d,day = %d,hour = %d ,min = %d,tm_sec =  %d\n",res->tm_year+1900,res->tm_mon+1,res->tm_mday,res->tm_hour,res->tm_min,res->tm_sec);
+	os_printf("year= %d ,mon = %d,day = %d,weekday = %d,hour = %d ,min = %d,tm_sec =  %d\n",res->tm_year+1900,res->tm_mon+1,res->tm_mday,res->tm_wday,res->tm_hour,res->tm_min,res->tm_sec);
 }
  
 void ICACHE_FLASH_ATTR
@@ -1393,7 +1395,16 @@ user_esp_platform_init(void)
 			esp_param.tsM_buff[index] = 0;
 			esp_param.teH_buff[index] = 0;
 			esp_param.teM_buff[index] = 0;
+			esp_param.alarm_repeat[index] = 0;
 		}
+		os_bzero(esp_param.alarm0_name, 20);
+		os_bzero(esp_param.alarm1_name, 20);
+		os_bzero(esp_param.alarm2_name, 20);
+		os_bzero(esp_param.alarm3_name, 20);
+		os_bzero(esp_param.alarm4_name, 20);
+		os_bzero(esp_param.alarm5_name, 20);
+		os_bzero(esp_param.alarm6_name, 20);
+		
 	}
 
 	struct rst_info *rtc_info = system_get_rst_info();

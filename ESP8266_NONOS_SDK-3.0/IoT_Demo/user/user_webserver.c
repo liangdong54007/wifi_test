@@ -296,36 +296,54 @@ light_status_get(struct jsontree_context *js_ctx)
         jsontree_write_int(js_ctx, user_light_get_period());
     }	else if (os_strncmp(path, "tsH", 3) == 0) {
 	jsontree_write_atom(js_ctx, "[");
-    	jsontree_write_int_array(js_ctx, esp_param.tsH_buff, 7);
+    	jsontree_write_int_array(js_ctx, esp_param.tsH_buff, MAX_ALARM_NUM);
     	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "tsM", 3) == 0) {
         jsontree_write_atom(js_ctx, "[");
-        jsontree_write_int_array(js_ctx, esp_param.tsM_buff, 7);
+        jsontree_write_int_array(js_ctx, esp_param.tsM_buff, MAX_ALARM_NUM);
 	 jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "teH", 3) == 0) {
 	jsontree_write_atom(js_ctx, "[");
-	jsontree_write_int_array(js_ctx, esp_param.teH_buff, 7);
+	jsontree_write_int_array(js_ctx, esp_param.teH_buff, MAX_ALARM_NUM);
 	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "teM", 3) == 0) {
 	jsontree_write_atom(js_ctx, "[");
-	jsontree_write_int_array(js_ctx, esp_param.teM_buff, 7);
+	jsontree_write_int_array(js_ctx, esp_param.teM_buff, MAX_ALARM_NUM);
 	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "alarm_red", 9) == 0) {
        jsontree_write_atom(js_ctx, "[");
-       jsontree_write_int_array(js_ctx, esp_param.alarm_red, 7);
+       jsontree_write_int_array(js_ctx, esp_param.alarm_red, MAX_ALARM_NUM);
 	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "alarm_green", 11) == 0) {
 	jsontree_write_atom(js_ctx, "[");
-	jsontree_write_int_array(js_ctx, esp_param.alarm_green, 7);
+	jsontree_write_int_array(js_ctx, esp_param.alarm_green, MAX_ALARM_NUM);
 	jsontree_write_atom(js_ctx, "]");
     }else if (os_strncmp(path, "alarm_blue", 10) == 0) {
 	jsontree_write_atom(js_ctx, "[");
-	jsontree_write_int_array(js_ctx, esp_param.alarm_blue, 7);
+	jsontree_write_int_array(js_ctx, esp_param.alarm_blue, MAX_ALARM_NUM);
 	jsontree_write_atom(js_ctx, "]");
-    }else if (os_strncmp(path, "alarm", 5) == 0) {
+    }else if (os_strncmp(path, "alarm_repeat", 12) == 0) {
+	jsontree_write_atom(js_ctx, "[");
+	jsontree_write_int_array(js_ctx, esp_param.alarm_repeat, MAX_ALARM_NUM);
+	jsontree_write_atom(js_ctx, "]");
+    }	else if (os_strncmp(path, "alarm0_name", 11) == 0) {
+      jsontree_write_string(js_ctx, esp_param.alarm0_name);
+    } else if (os_strncmp(path, "alarm1_name", 11) == 0) {
+      jsontree_write_string(js_ctx, esp_param.alarm1_name);
+    } else if (os_strncmp(path, "alarm2_name", 11) == 0) {
+      jsontree_write_string(js_ctx, esp_param.alarm2_name);
+    } else if (os_strncmp(path, "alarm3_name", 11) == 0) {
+      jsontree_write_string(js_ctx, esp_param.alarm3_name);
+    } else if (os_strncmp(path, "alarm4_name", 11) == 0) {
+      jsontree_write_string(js_ctx, esp_param.alarm4_name);
+    } else if (os_strncmp(path, "alarm5_name", 11) == 0) {
+      jsontree_write_string(js_ctx, esp_param.alarm5_name);
+    } else if (os_strncmp(path, "alarm6_name", 11) == 0) {
+      jsontree_write_string(js_ctx, esp_param.alarm6_name);
+    } else if (os_strncmp(path, "alarm", 5) == 0) {
         jsontree_write_int(js_ctx, 1);
     } 
-
+   
     return 0;
 }
 
@@ -339,8 +357,9 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
     period = 1000;
     cw=0;
     ww=0;
+    char buffer[20];
     extern uint8 light_sleep_flg;
-    
+    os_bzero(buffer, 20);
     while ((type = jsonparse_next(parser)) != 0) {
         if (type == JSON_TYPE_PAIR_NAME) {
             if (jsonparse_strcmp_value(parser, "red") == 0) {
@@ -420,14 +439,44 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
 		  esp_param.alarm_green[now_set_alarm] = g;
 		  esp_param.alarm_blue[now_set_alarm] = b;
 		  esp_param.flag_alarm_save = 0X5A;
-		  flag_is_alarm_data  = 1;  //到这里表示改json报文为alarm设置报文  rgb数据不是灯亮度改变
-		  if(curr_alarm ==now_set_alarm)
-	  	{//如果重新接受的闹钟为当前时间段执行闹钟，则重新使能它
-	  		curr_alarm = 100; 
-	  	}
-		  
-		  os_printf("ld add save_alarm_data to flash\r\n");
-		  system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));		
+		  flag_is_alarm_data  = 1;  //到这里表示该json报文为alarm设置报文  rgb数据不是灯亮度改变	
+            }else if (jsonparse_strcmp_value(parser, "alarm0_name") == 0) {
+                
+                jsonparse_next(parser);
+                jsonparse_next(parser);
+                jsonparse_copy_value(parser, buffer, sizeof(buffer));
+		   switch(now_set_alarm)
+		  {
+			case 0:
+				os_memcpy(esp_param.alarm0_name, buffer, os_strlen(buffer));
+				break;
+			case 1:
+				os_memcpy(esp_param.alarm1_name, buffer, os_strlen(buffer));
+				break;
+			case 2:
+				os_memcpy(esp_param.alarm2_name, buffer, os_strlen(buffer));
+				break;
+			case 3:
+				os_memcpy(esp_param.alarm3_name, buffer, os_strlen(buffer));
+				break;
+			case 4:
+				os_memcpy(esp_param.alarm4_name, buffer, os_strlen(buffer));
+				break;
+			case 5:
+				os_memcpy(esp_param.alarm5_name, buffer, os_strlen(buffer));
+				break;
+			case 6:
+				os_memcpy(esp_param.alarm6_name, buffer, os_strlen(buffer));
+				break;	
+		   }
+		
+            }else if (jsonparse_strcmp_value(parser, "alarm_repeat") == 0) {
+                uint32 status;
+                jsonparse_next(parser);
+                jsonparse_next(parser);
+                status = jsonparse_get_value_as_int(parser);
+		   esp_param.alarm_repeat[now_set_alarm] = status;
+                os_printf("alarm_repeat: %d \n",status);
             }else if (jsonparse_strcmp_value(parser, "period") == 0) {
                 uint32 status;
                 jsonparse_next(parser);
@@ -464,6 +513,15 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
 	    }
 	    light_set_aim(r,g,b,cw,ww,period);
 	}
+	else   // flag_is_alarm_data == 1
+	{
+		 if(curr_alarm ==now_set_alarm)
+	  	{//如果重新接受的闹钟为当前时间段执行闹钟，则重新使能它
+	  		curr_alarm = 100; 
+	  	}
+		  os_printf("ld add save_alarm_data to flash\r\n");
+		  system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));	
+	}
     return 0;
 }
 
@@ -477,6 +535,14 @@ JSONTREE_OBJECT(rgb_tree,
                 JSONTREE_PAIR("cwhite", &light_callback),
                 JSONTREE_PAIR("wwhite", &light_callback),
                 JSONTREE_PAIR("alarm", &light_callback),
+                JSONTREE_PAIR("alarm0_name", &light_callback),
+                JSONTREE_PAIR("alarm1_name", &light_callback),
+                JSONTREE_PAIR("alarm2_name", &light_callback),
+                JSONTREE_PAIR("alarm3_name", &light_callback),
+                JSONTREE_PAIR("alarm4_name", &light_callback),
+                JSONTREE_PAIR("alarm5_name", &light_callback),
+                JSONTREE_PAIR("alarm6_name", &light_callback),
+                JSONTREE_PAIR("alarm_repeat", &light_callback),
                 JSONTREE_PAIR("tsH", &light_callback),
                 JSONTREE_PAIR("tsM", &light_callback),
                 JSONTREE_PAIR("teH", &light_callback),
@@ -484,6 +550,7 @@ JSONTREE_OBJECT(rgb_tree,
                 JSONTREE_PAIR("alarm_red", &light_callback),
                 JSONTREE_PAIR("alarm_green", &light_callback),
                 JSONTREE_PAIR("alarm_blue", &light_callback),
+              
                 );
 JSONTREE_OBJECT(sta_tree,
                 JSONTREE_PAIR("period", &light_callback),
