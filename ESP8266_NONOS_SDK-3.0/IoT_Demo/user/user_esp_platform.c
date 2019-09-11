@@ -1087,7 +1087,7 @@ alarm_ctl(struct tm * p_res)
 		//os_printf("tm_hour:%d,tm_min:%d,tsH:%d,tsM:%d,teH:%d,teM:%d\r\n",p_res->tm_hour,p_res->tm_min,esp_param.tsH_buff[index],esp_param.tsM_buff[index],esp_param.teH_buff[index],esp_param.teM_buff[index]);
 		//os_printf("curr_alarm:%d,index:%d\r\n",curr_alarm,index );
 		if( (p_res->tm_hour>=esp_param.tsH_buff[index])&&(p_res->tm_hour<=esp_param.teH_buff[index])&&
-									(index!=curr_alarm))
+									(index!=curr_alarm)&&(1==esp_param.alarm_onoff[index]))
 
 		{
 			if((p_res->tm_hour==esp_param.tsH_buff[index])&&(p_res->tm_min<esp_param.tsM_buff[index]))
@@ -1112,8 +1112,20 @@ alarm_ctl(struct tm * p_res)
 					}
 				}
 			}
-			
-			
+		}
+	}
+
+	//当curr_alarm<MAX_ALARM_NUM肯定当前有闹钟生效，那么当退出当前闹钟时间段后
+	//就要重新使能闹钟，以便明天闹钟再次生效。
+	if(curr_alarm<MAX_ALARM_NUM)
+	{  //这里肯定闹铃生效了，只要判断闹铃结束时间即可
+		if((p_res->tm_hour==esp_param.teH_buff[index])&&(p_res->tm_min>esp_param.teM_buff[index]))
+		{
+			curr_alarm =100;
+		}
+		if(p_res->tm_hour>esp_param.teH_buff[index])
+		{
+			curr_alarm =100;
 		}
 	}
 }
@@ -1396,6 +1408,7 @@ user_esp_platform_init(void)
 			esp_param.teH_buff[index] = 0;
 			esp_param.teM_buff[index] = 0;
 			esp_param.alarm_repeat[index] = 0;
+			esp_param.alarm_onoff[index] = 0;
 		}
 		os_bzero(esp_param.alarm0_name, 20);
 		os_bzero(esp_param.alarm1_name, 20);

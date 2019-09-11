@@ -43,6 +43,7 @@ struct esp_platform_saved_param {
     uint32 alarm_red[MAX_ALARM_NUM];
     uint32 alarm_green[MAX_ALARM_NUM];
     uint32 alarm_blue[MAX_ALARM_NUM];
+    uint32 alarm_onoff[MAX_ALARM_NUM];
     uint8 alarm0_name[20];
     uint8 alarm1_name[20];
     uint8 alarm2_name[20];
