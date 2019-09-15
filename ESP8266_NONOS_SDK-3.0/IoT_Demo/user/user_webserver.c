@@ -516,27 +516,35 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
 		 esp_param.teM_buff[now_set_alarm] = temp_teM_buff;
 		 esp_param.alarm_repeat[now_set_alarm] = temp_alarm_repeat;
 		 esp_param.alarm_onoff[now_set_alarm] = temp_alarm_onoff;
+		  os_printf("now_set_alarm=%d ,alarm_name_buffer = %s\n", now_set_alarm, alarm_name_buffer);
 		  switch(now_set_alarm)
 		  {
 			case 0:
+				os_bzero(esp_param.alarm0_name, 20);
 				os_memcpy(esp_param.alarm0_name, alarm_name_buffer, os_strlen(alarm_name_buffer));
 				break;
 			case 1:
+				os_bzero(esp_param.alarm1_name, 20);
 				os_memcpy(esp_param.alarm1_name, alarm_name_buffer, os_strlen(alarm_name_buffer));
 				break;
 			case 2:
+				os_bzero(esp_param.alarm2_name, 20);
 				os_memcpy(esp_param.alarm2_name, alarm_name_buffer, os_strlen(alarm_name_buffer));
 				break;
 			case 3:
+				os_bzero(esp_param.alarm3_name, 20);
 				os_memcpy(esp_param.alarm3_name, alarm_name_buffer, os_strlen(alarm_name_buffer));
 				break;
 			case 4:
+				os_bzero(esp_param.alarm4_name, 20);
 				os_memcpy(esp_param.alarm4_name, alarm_name_buffer, os_strlen(alarm_name_buffer));
 				break;
 			case 5:
+				os_bzero(esp_param.alarm5_name, 20);
 				os_memcpy(esp_param.alarm5_name, alarm_name_buffer, os_strlen(alarm_name_buffer));
 				break;
 			case 6:
+				os_bzero(esp_param.alarm6_name, 20);
 				os_memcpy(esp_param.alarm6_name, alarm_name_buffer, os_strlen(alarm_name_buffer));
 				break;	
 		   }

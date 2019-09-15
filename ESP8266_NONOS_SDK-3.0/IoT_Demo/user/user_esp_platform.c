@@ -1106,7 +1106,7 @@ alarm_ctl(struct tm * p_res)
 					if(esp_param.alarm_repeat[index] &(0x01<<(p_res->tm_wday)))
 					{  //当星期n被使能才最终出发闹钟
 						curr_alarm = index;
-						os_printf("alarm time now:%d\r\n",curr_alarm);
+						os_printf("alarm time now index:%d\r\n",curr_alarm);
 						light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
 							0,0,user_light_get_period());
 					}
@@ -1119,12 +1119,14 @@ alarm_ctl(struct tm * p_res)
 	//就要重新使能闹钟，以便明天闹钟再次生效。
 	if(curr_alarm<MAX_ALARM_NUM)
 	{  //这里肯定闹铃生效了，只要判断闹铃结束时间即可
-		if((p_res->tm_hour==esp_param.teH_buff[index])&&(p_res->tm_min>esp_param.teM_buff[index]))
+		if((p_res->tm_hour==esp_param.teH_buff[curr_alarm])&&(p_res->tm_min>esp_param.teM_buff[curr_alarm]))
 		{
+			os_printf("alarm time end index:%d\r\n",curr_alarm);
 			curr_alarm =100;
 		}
-		if(p_res->tm_hour>esp_param.teH_buff[index])
+		if(p_res->tm_hour>esp_param.teH_buff[curr_alarm])
 		{
+			os_printf("alarm time end index:%d\r\n",curr_alarm);
 			curr_alarm =100;
 		}
 	}
