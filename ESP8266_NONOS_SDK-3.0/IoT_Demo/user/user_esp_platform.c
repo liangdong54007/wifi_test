@@ -1084,31 +1084,66 @@ alarm_ctl(struct tm * p_res)
 	int index=0;
 	for(index=0;index<MAX_ALARM_NUM;index++)
 	{
-		//os_printf("tm_hour:%d,tm_min:%d,tsH:%d,tsM:%d,teH:%d,teM:%d\r\n",p_res->tm_hour,p_res->tm_min,esp_param.tsH_buff[index],esp_param.tsM_buff[index],esp_param.teH_buff[index],esp_param.teM_buff[index]);
-		//os_printf("curr_alarm:%d,index:%d\r\n",curr_alarm,index );
-		if( (p_res->tm_hour>=esp_param.tsH_buff[index])&&(p_res->tm_hour<=esp_param.teH_buff[index])&&
-									(index!=curr_alarm)&&(1==esp_param.alarm_onoff[index]))
-
+			//os_printf("tm_hour:%d,tm_min:%d,tsH:%d,tsM:%d,teH:%d,teM:%d\r\n",p_res->tm_hour,p_res->tm_min,esp_param.tsH_buff[index],esp_param.tsM_buff[index],esp_param.teH_buff[index],esp_param.teM_buff[index]);
+			//os_printf("curr_alarm:%d,index:%d\r\n",curr_alarm,index );
+		if(esp_param.tsH_buff[index]<=esp_param.teH_buff[index])  //闹铃起始结束时间段为当天
 		{
-			if((p_res->tm_hour==esp_param.tsH_buff[index])&&(p_res->tm_min<esp_param.tsM_buff[index]))
+			if( (p_res->tm_hour>=esp_param.tsH_buff[index])&&(p_res->tm_hour<=esp_param.teH_buff[index])&&
+										(index!=curr_alarm)&&(1==esp_param.alarm_onoff[index]))
+
 			{
-				//当hour等于tsH的时候，如果tm_min< tsM_buff,那么闹钟没到
-				//do_nothing
-			}
-			else
-			{ 
-				if((p_res->tm_hour==esp_param.teH_buff[index])&&(p_res->tm_min>=esp_param.teM_buff[index]))
-				{   // 当时间的小时数相等时候，如果tm_hour>= teM_buff,那么闹钟没到
+				if((p_res->tm_hour==esp_param.tsH_buff[index])&&(p_res->tm_min<esp_param.tsM_buff[index]))
+				{
+					//当hour等于tsH的时候，如果tm_min< tsM_buff,那么闹钟没到
 					//do_nothing
 				}
 				else
-				{  //当tm_hour<teH_buff的时候不需要再判定min的值
-					if(esp_param.alarm_repeat[index] &(0x01<<(p_res->tm_wday)))
-					{  //当星期n被使能才最终出发闹钟
-						curr_alarm = index;
-						os_printf("alarm time now index:%d\r\n",curr_alarm);
-						light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
-							0,0,user_light_get_period());
+				{ 
+					if((p_res->tm_hour==esp_param.teH_buff[index])&&(p_res->tm_min>=esp_param.teM_buff[index]))
+					{   // 当时间的小时数相等时候，如果tm_hour>= teM_buff,那么闹钟没到
+						//do_nothing
+					}
+					else
+					{  //当tm_hour<teH_buff的时候不需要再判定min的值
+						if(esp_param.alarm_repeat[index] &(0x01<<(p_res->tm_wday)))
+						{  //当星期n被使能才最终出发闹钟
+							curr_alarm = index;
+							os_printf("test1 alarm time start index:%d\r\n",curr_alarm);
+							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+								0,0,user_light_get_period());
+						}
+					}
+				}
+			}
+		}
+		else  //闹铃结束时间段为第二天
+		{
+			if((index!=curr_alarm)&&(1==esp_param.alarm_onoff[index]))
+			{   //当前要check闹铃未开始且闹铃使能
+				if(p_res->tm_hour>=esp_param.tsH_buff[index])
+				{  //第一天
+					if((p_res->tm_hour>esp_param.tsH_buff[index])||((p_res->tm_hour==esp_param.tsH_buff[index])&&(p_res->tm_min>=esp_param.tsM_buff[index])))
+					{
+						if(esp_param.alarm_repeat[index] &(0x01<<(p_res->tm_wday)))
+						{  //当星期n被使能才最终出发闹钟
+							curr_alarm = index;
+							os_printf("test2 alarm time start index:%d\r\n",curr_alarm);
+							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+								0,0,user_light_get_period());
+						}
+					}
+				}
+				else
+				{ //第二天
+					if((p_res->tm_hour<esp_param.teH_buff[index])||((p_res->tm_hour==esp_param.teH_buff[index])&&(p_res->tm_min<esp_param.teM_buff[index])))
+					{
+						if(esp_param.alarm_repeat[index] &(0x01<<(p_res->tm_wday)))
+						{  //当星期n被使能才最终出发闹钟
+							curr_alarm = index;
+							os_printf("test3 alarm time start index:%d\r\n",curr_alarm);
+							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+								0,0,user_light_get_period());
+						}
 					}
 				}
 			}
@@ -1119,15 +1154,29 @@ alarm_ctl(struct tm * p_res)
 	//就要重新使能闹钟，以便明天闹钟再次生效。
 	if(curr_alarm<MAX_ALARM_NUM)
 	{  //这里肯定闹铃生效了，只要判断闹铃结束时间即可
-		if((p_res->tm_hour==esp_param.teH_buff[curr_alarm])&&(p_res->tm_min>esp_param.teM_buff[curr_alarm]))
+		if(esp_param.tsH_buff[curr_alarm]<=esp_param.teH_buff[curr_alarm])  //闹铃起始结束时间段为当天
 		{
-			os_printf("alarm time end index:%d\r\n",curr_alarm);
-			curr_alarm =100;
+			if((p_res->tm_hour==esp_param.teH_buff[curr_alarm])&&(p_res->tm_min>=esp_param.teM_buff[curr_alarm]))
+			{
+				os_printf("test1 alarm time end index:%d\r\n",curr_alarm);
+				curr_alarm =100;
+			}
+			if(p_res->tm_hour>esp_param.teH_buff[curr_alarm])
+			{
+				os_printf("test2 alarm time end index:%d\r\n",curr_alarm);
+				curr_alarm =100;
+			}
 		}
-		if(p_res->tm_hour>esp_param.teH_buff[curr_alarm])
+		else //闹铃结束时间段为第二天
 		{
-			os_printf("alarm time end index:%d\r\n",curr_alarm);
-			curr_alarm =100;
+			if(p_res->tm_hour<esp_param.tsH_buff[curr_alarm])
+			{  // 当前时间为第二天
+				if((p_res->tm_hour>esp_param.teH_buff[curr_alarm])||((p_res->tm_hour==esp_param.teH_buff[curr_alarm])&&(p_res->tm_min>=esp_param.teM_buff[curr_alarm])))
+				{
+					os_printf("test3 alarm time end index:%d\r\n",curr_alarm);
+					curr_alarm =100;
+				}
+			}
 		}
 	}
 }
