@@ -273,7 +273,7 @@ LOCAL int ICACHE_FLASH_ATTR
 light_status_get(struct jsontree_context *js_ctx)
 {
     const char *path = jsontree_path_name(js_ctx, js_ctx->depth - 1);
-
+    uint8 my_version[20] = {0};
     if (os_strncmp(path, "red", 3) == 0) {
         jsontree_write_int(js_ctx, user_light_get_duty(LIGHT_RED));
     } else if (os_strncmp(path, "green", 5) == 0) {
@@ -346,7 +346,12 @@ light_status_get(struct jsontree_context *js_ctx)
       jsontree_write_string(js_ctx, esp_param.alarm6_name);
     } else if (os_strncmp(path, "alarm", 5) == 0) {
         jsontree_write_int(js_ctx, 1);
-    } 
+    }else if (os_strncmp(path, "versions", 8) == 0) {
+       os_sprintf(my_version,"%s%d.%d.%dt%d(%s)",VERSION_TYPE,IOT_VERSION_MAJOR,\
+	IOT_VERSION_MINOR,IOT_VERSION_REVISION,device_type,UPGRADE_FALG);
+       jsontree_write_string(js_ctx, my_version);
+    }  
+	
    
     return 0;
 }
@@ -588,6 +593,7 @@ JSONTREE_OBJECT(rgb_tree,
                 );
 JSONTREE_OBJECT(sta_tree,
                 JSONTREE_PAIR("period", &light_callback),
+                JSONTREE_PAIR("versions", &light_callback),
                 JSONTREE_PAIR("rgb", &rgb_tree));
 JSONTREE_OBJECT(PwmTree,
                 JSONTREE_PAIR("light", &sta_tree));

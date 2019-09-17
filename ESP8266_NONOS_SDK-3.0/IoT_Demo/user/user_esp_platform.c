@@ -1190,7 +1190,11 @@ sntp_read_timer_callback(void *arg)
 	os_printf("time:%d\r\n",time);
 	//os_printf("date:%s\r\n",sntp_get_real_time(time));
 	res = sntp_localtime ((const time_t *)&time);
-	alarm_ctl(res);
+	if(0!=time)  //防止sntp 未初始化成功
+	{
+		os_printf("check alarm\r\n");
+		alarm_ctl(res);
+	}
 	os_printf("year= %d ,mon = %d,day = %d,weekday = %d,hour = %d ,min = %d,tm_sec =  %d\n",res->tm_year+1900,res->tm_mon+1,res->tm_mday,res->tm_wday,res->tm_hour,res->tm_min,res->tm_sec);
 }
  
