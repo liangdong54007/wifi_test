@@ -128,7 +128,7 @@ user_init(void)
     uart_init(BIT_RATE_115200, BIT_RATE_115200);
     os_printf("SDK version:%s\n", system_get_sdk_version());
     os_printf("\r\n-------------------ld007 --hello word!!----------------------------\r\n");
-    os_printf("---------ld007 rgb wc light demo  sntp  20190915 16:30------------------\r\n");
+    os_printf("---------ld007 rgb wc light demo  sntp  20190921 21:06------------------\r\n");
 
     if (!system_partition_get_item(SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM, &partition_item)) {
         os_printf("Get partition information fail\n");

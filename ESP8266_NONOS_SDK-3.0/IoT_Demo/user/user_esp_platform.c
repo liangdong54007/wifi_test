@@ -1112,6 +1112,15 @@ alarm_ctl(struct tm * p_res)
 							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
 								0,0,user_light_get_period());
 						}
+						else if(0==esp_param.alarm_repeat[index])  //当前闹铃为once
+						{
+							esp_param.alarm_onoff[index] = 0;
+							os_printf("once1 alarm time start index:%d\r\n",curr_alarm);
+							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+								0,0,user_light_get_period());
+							os_printf("once1 to need  save_alarm_data to flash\r\n");
+		  					system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));		
+						}
 					}
 				}
 			}
@@ -1131,6 +1140,15 @@ alarm_ctl(struct tm * p_res)
 							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
 								0,0,user_light_get_period());
 						}
+						else if(0==esp_param.alarm_repeat[index])  //当前闹铃为once
+						{
+							esp_param.alarm_onoff[index] = 0;
+							os_printf("once2 alarm time start index:%d\r\n",curr_alarm);
+							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+								0,0,user_light_get_period());
+							os_printf("once2 to need  save_alarm_data to flash\r\n");
+		  					system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));		
+						}
 					}
 				}
 				else
@@ -1143,6 +1161,15 @@ alarm_ctl(struct tm * p_res)
 							os_printf("test3 alarm time start index:%d\r\n",curr_alarm);
 							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
 								0,0,user_light_get_period());
+						}
+						else if(0==esp_param.alarm_repeat[index])  //当前闹铃为once
+						{
+							esp_param.alarm_onoff[index] = 0;
+							os_printf("once3 alarm time start index:%d\r\n",curr_alarm);
+							light_set_aim(esp_param.alarm_red[index],esp_param.alarm_green[index],esp_param.alarm_blue[index],
+								0,0,user_light_get_period());
+							os_printf("once3 to need  save_alarm_data to flash\r\n");
+		  					system_param_save_with_protect(priv_param_start_sec + 1, &esp_param, sizeof(esp_param));		
 						}
 					}
 				}
