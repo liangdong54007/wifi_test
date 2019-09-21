@@ -1,0 +1,27 @@
+---- curr_alarm Matches (31 in 2 files) ----
+User_esp_platform.c (iot_demo\user):int curr_alarm = 100;  //表征当前执行的闹钟   100是个无效值 因为它大于MAX_ALARM_NUM-1
+User_esp_platform.c (iot_demo\user):			//os_printf("curr_alarm:%d,index:%d\r\n",curr_alarm,index );
+User_esp_platform.c (iot_demo\user):										(index!=curr_alarm)&&(1==esp_param.alarm_onoff[index]))
+User_esp_platform.c (iot_demo\user):							curr_alarm = index;
+User_esp_platform.c (iot_demo\user):							os_printf("test1 alarm time start index:%d\r\n",curr_alarm);
+User_esp_platform.c (iot_demo\user):			if((index!=curr_alarm)&&(1==esp_param.alarm_onoff[index]))
+User_esp_platform.c (iot_demo\user):							curr_alarm = index;
+User_esp_platform.c (iot_demo\user):							os_printf("test2 alarm time start index:%d\r\n",curr_alarm);
+User_esp_platform.c (iot_demo\user):							curr_alarm = index;
+User_esp_platform.c (iot_demo\user):							os_printf("test3 alarm time start index:%d\r\n",curr_alarm);
+User_esp_platform.c (iot_demo\user):	//当curr_alarm<MAX_ALARM_NUM肯定当前有闹钟生效，那么当退出当前闹钟时间段后
+User_esp_platform.c (iot_demo\user):	if(curr_alarm<MAX_ALARM_NUM)
+User_esp_platform.c (iot_demo\user):		if(esp_param.tsH_buff[curr_alarm]<=esp_param.teH_buff[curr_alarm])  //闹铃起始结束时间段为当天
+User_esp_platform.c (iot_demo\user):			if((p_res->tm_hour==esp_param.teH_buff[curr_alarm])&&(p_res->tm_min>=esp_param.teM_buff[curr_alarm]))
+User_esp_platform.c (iot_demo\user):				os_printf("test1 alarm time end index:%d\r\n",curr_alarm);
+User_esp_platform.c (iot_demo\user):				curr_alarm =100;
+User_esp_platform.c (iot_demo\user):			if(p_res->tm_hour>esp_param.teH_buff[curr_alarm])
+User_esp_platform.c (iot_demo\user):				os_printf("test2 alarm time end index:%d\r\n",curr_alarm);
+User_esp_platform.c (iot_demo\user):				curr_alarm =100;
+User_esp_platform.c (iot_demo\user):			if(p_res->tm_hour<esp_param.tsH_buff[curr_alarm])
+User_esp_platform.c (iot_demo\user):				if((p_res->tm_hour>esp_param.teH_buff[curr_alarm])||((p_res->tm_hour==esp_param.teH_buff[curr_alarm])&&(p_res->tm_min>=esp_param.teM_buff[curr_alarm])))
+User_esp_platform.c (iot_demo\user):					os_printf("test3 alarm time end index:%d\r\n",curr_alarm);
+User_esp_platform.c (iot_demo\user):					curr_alarm =100;
+User_webserver.c (iot_demo\user):extern int curr_alarm;  //表征当前执行的闹钟   100是个无效值 因为它大于MAX_ALARM_NUM-1
+User_webserver.c (iot_demo\user):		 if(curr_alarm ==now_set_alarm)
+User_webserver.c (iot_demo\user):	  		curr_alarm = 100; 
