@@ -40,9 +40,17 @@
 /*Or , we can choose 5 channels : RED,GREEN,BLUE,COLD-WHITE,WARM-WHITE*/
 #define PWM_CHANNEL	5  //  5:5channel ; 3:3channel
 
+//#define USED_CREE_LED
+
+#ifdef USED_CREE_LED
+#define LIGHT_RED       1
+#define LIGHT_GREEN     0
+#define LIGHT_BLUE      2
+#else
 #define LIGHT_RED       0
 #define LIGHT_GREEN     1
 #define LIGHT_BLUE      2
+#endif
 #define LIGHT_COLD_WHITE      3
 #define LIGHT_WARM_WHITE      4
 

@@ -282,7 +282,7 @@ light_status_get(struct jsontree_context *js_ctx)
         jsontree_write_int(js_ctx, user_light_get_duty(LIGHT_BLUE));
     } else if (os_strncmp(path, "wwhite", 6) == 0) {
         if(PWM_CHANNEL>LIGHT_WARM_WHITE){
-            jsontree_write_int(js_ctx, user_light_get_duty(LIGHT_WARM_WHITE));
+            jsontree_write_int(js_ctx, user_light_get_duty(LIGHT_WARM_WHITE)/221);
         }else{
             jsontree_write_int(js_ctx, 0);
         }
@@ -421,7 +421,7 @@ light_status_set(struct jsontree_context *js_ctx, struct jsonparse_state *parser
                 uint32 status;
                 jsonparse_next(parser);
                 jsonparse_next(parser);
-                status = jsonparse_get_value_as_int(parser);
+                status = jsonparse_get_value_as_int(parser)*221;
                 ww=status;
                 os_printf("WW: %d \n",status);
                 //user_light_set_duty(status, LIGHT_BLUE);
